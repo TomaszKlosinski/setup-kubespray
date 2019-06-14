@@ -24,9 +24,20 @@ The script will produce an admin token to access the dashboard. Please copy it a
 https://10.0.20.101:6443/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login
 
 
-To use local kubectl run:
+To access the cluster, ssh to the first master and use kubectl there:
 ```
-./inventory/lab/artifacts/kubectl.sh [command]
+vagrant ssh kub-1
+```
+
+Alternatively, use local kubectl:
+```
+inventory/lab/artifacts/kubectl.sh
+```
+
+Or set kubectl to access this cluster pernamently:
+```
+cp inventory/lab/artifacts/kubectl-binary /usr/local/bin/kubectl (or brew install kubernetes-cli)
+ln -s inventory/lab/artifacts/admin.conf ~/.kube/config
 ```
 
 ---
