@@ -20,24 +20,26 @@ curl -LO https://raw.githubusercontent.com/TomaszKlosinski/setup-kubespray/maste
 chmod +x setup-kubespray.sh
 ./setup-kubespray.sh
 ```
-The script will produce an admin token to access the dashboard. Please copy it and paste into:  
+The script will produce an admin token to access the dashboard. Please copy it and paste into:
 https://10.0.20.101:6443/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login
 
 
-To access the cluster, ssh to the first master and use kubectl there:
+To access the cluster with Kubernetes client, ssh to the first master and use kubectl there:
 ```
 vagrant ssh kub-1
+kubectl version
 ```
 
-Alternatively, use local kubectl:
+Alternatively, use local kubectl fetched by the script:
 ```
-inventory/lab/artifacts/kubectl.sh
+inventory/lab/artifacts/kubectl.sh version
 ```
 
-Or set kubectl to access this cluster pernamently:
+Or set system-wide kubectl to access this cluster pernamently:
 ```
 cp inventory/lab/artifacts/kubectl-binary /usr/local/bin/kubectl (or brew install kubernetes-cli)
 ln -s inventory/lab/artifacts/admin.conf ~/.kube/config
+kubectl version
 ```
 
 ---
