@@ -20,10 +20,8 @@ curl -LO https://raw.githubusercontent.com/TomaszKlosinski/setup-kubespray/maste
 chmod +x setup-kubespray.sh
 ./setup-kubespray.sh
 ```
-The script will produce an admin token to access the dashboard.
-
-Please copy it and paste into: 
-
+The script will produce an admin token to access the dashboard.  
+Please copy it and paste into:  
 https://10.0.20.101:6443/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login
 
 
