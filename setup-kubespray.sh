@@ -30,7 +30,7 @@ cat << EOF > vagrant/config.rb
 \$num_instances = 3
 \$os = "ubuntu1804"
 \$subnet = "10.0.20"
-\$network_plugin = "flannel"
+\$network_plugin = "calico"
 \$inventory = "$INV"
 EOF
 
@@ -130,4 +130,4 @@ echo -e "\t$INV/artifacts/kubectl.sh"
 
 echo -e "\nOr set kubectl to access this cluster pernamently:"
 echo -e "\tcp $INV/artifacts/kubectl-binary /usr/local/bin/kubectl (or brew install kubernetes-cli)"
-echo -e "\tln -s $INV/artifacts/admin.conf ~/.kube/config"
+echo -e "\tln -s \$( pwd )/$INV/artifacts/admin.conf ~/.kube/config"
