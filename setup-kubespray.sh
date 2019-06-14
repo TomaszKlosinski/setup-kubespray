@@ -45,15 +45,18 @@ echo -e "\n\n\nInstall and configure kubectl"
 cd $INV/artifacts
 rm -rf kubectl kubectl.sh
 
-curl -LO https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/darwin/amd64/kubectl
-mv kubectl kubectl-binary
-chmod +x kubectl-binary
+if [ ! -f kubectl-binary ]; then
+  echo -e "\n Download kubectl binary"
+  curl -LO https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/darwin/amd64/kubectl
+  mv kubectl kubectl-binary
+  chmod +x kubectl-binary
+fi
+
 
 cat << EOF > kubectl.sh
 #!/bin/bash
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-\${DIR}/kubectl-binary --kubeconfig=\${BASH_SOURCE%/*}/admin.conf \$@
+\${BASH_SOURCE%/*}/kubectl-binary --kubeconfig=\${BASH_SOURCE%/*}/admin.conf \$@
 EOF
 
 chmod +x kubectl.sh
@@ -63,7 +66,7 @@ export PATH=$PATH:$PWD
 echo -e "\n\n\nCheck kubectl version"
 kubectl.sh version
 
-echo -e "\n\nGet nodes in k8s cluster"
+echo -e "\n\nGet nodes of k8s cluster"
 kubectl.sh get nodes
 
 cd $REPO_DIR
@@ -80,7 +83,7 @@ metadata:
   namespace: kube-system
 EOF
 
-echo -e "\n\nApply service-account.yaml"
+echo -e "\n\nApply $INV/service-account.yaml"
 kubectl.sh apply -f service-account.yaml
 
 
@@ -99,11 +102,11 @@ subjects:
   namespace: kube-system
 EOF
 
-echo -e "\n\nApply cluster-role-binding.yaml"
+echo -e "\n\nApply $INV/cluster-role-binding.yaml"
 kubectl.sh apply -f cluster-role-binding.yaml
 
 # Copy admin user token:
-echo -e "\n\n\n#################### ADMIN TOKEN ####################"
+echo -e "\n\n\n#################### DASHBOARD ####################"
 ADMIN=$( kubectl.sh -n kube-system get secret | grep admin-user | awk '{print $1}' )
 kubectl.sh -n kube-system describe secret ${ADMIN}
 
@@ -111,5 +114,20 @@ FIRST_MASTER=$( vagrant ssh kub-1 -c "ip address show eth1 | grep 'inet ' | sed 
 echo -e "\n\nOpen and paste the token to login as admin:"
 echo -e "\thttps://${FIRST_MASTER}:6443/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/#!/login"
 
-echo -e "\n\nTo use local kubectl run:"
+
+# Configure kubectl on the first master
+echo -e "\n\n\n#################### KUBECTL ####################"
+vagrant ssh kub-1 -c "mkdir -p ~/.kube/" > /dev/null 2>&1
+vagrant ssh kub-1 -c "sudo cp /etc/kubernetes/admin.conf ~/.kube/config" > /dev/null 2>&1
+vagrant ssh kub-1 -c "sudo chown vagrant:vagrant ~/.kube/config" > /dev/null 2>&1
+vagrant ssh kub-1 -c "kubectl version" > /dev/null 2>&1
+
+echo -e "\nTo access the cluster, ssh to the first master and use kubectl there:"
+echo -e "\tvagrant ssh kub-1"
+
+echo -e "\n\nAlternatively, use local kubectl:"
 echo -e "\t$INV/artifacts/kubectl.sh"
+
+echo -e "\nOr set kubectl to access this cluster pernamently:"
+echo -e "\tcp $INV/artifacts/kubectl-binary /usr/local/bin/kubectl (or brew install kubernetes-cli)"
+echo -e "\tln -s $INV/artifacts/admin.conf ~/.kube/config"
